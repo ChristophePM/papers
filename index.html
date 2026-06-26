@@ -14,100 +14,268 @@
       --heading: #0D7680;
       --accent: #990F3D;
       --link: #0D7680;
+      --link-hover: #065459;
       --tag-bg: #EBF1F1;
       --tag-text: #0D7680;
+      --sidebar-bg: #F6E9DD;
+      --sidebar-active: #FFFFFF;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Georgia', 'Times New Roman', serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.75;
+      line-height: 1.7;
       font-size: 16px;
-      padding: 3rem 1.5rem;
-      max-width: 760px;
-      margin: 0 auto;
     }
-    .index-header {
-      border-bottom: 4px solid var(--text);
-      padding-bottom: 1rem;
-      margin-bottom: 2rem;
+
+    /* layout */
+    .hub {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
     }
-    .index-header h1 { font-size: 2rem; }
-    .index-header p {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
+    @media (max-width: 768px) {
+      .hub { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem !important;
+      }
+      .sidebar .topics { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .sidebar .topics li { margin-bottom: 0; }
+      .sidebar .topics a { padding: 0.4rem 0.75rem; }
     }
-    .paper-list { list-style: none; padding: 0; }
-    .paper-entry {
-      border-bottom: 1px solid var(--border);
-      padding: 1.25rem 0;
+
+    /* sidebar */
+    .sidebar {
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.25rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
     }
-    .paper-entry:last-child { border-bottom: none; }
-    .paper-entry a {
-      font-family: 'Georgia', serif;
-      font-size: 1.05rem;
+    .sidebar h1 {
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--text);
-      text-decoration: none;
+      margin-bottom: 0.25rem;
     }
-    .paper-entry a:hover { color: var(--heading); }
-    .paper-entry .entry-meta {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 0.3rem;
-    }
-    .paper-entry .entry-meta .tag {
-      display: inline-block;
-      font-size: 0.65rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 0.15rem 0.45rem;
-      border-radius: 3px;
-      background: var(--tag-bg);
-      color: var(--tag-text);
-      margin-right: 0.3rem;
-    }
-    .paper-entry .entry-desc {
-      font-size: 0.88rem;
-      color: var(--text);
-      margin-top: 0.35rem;
-    }
-    .footer {
-      margin-top: 3rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
+    .sidebar .subtitle {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 0.75rem;
       color: var(--text-muted);
-      text-align: center;
+      margin-bottom: 2rem;
     }
-    .footer a { color: var(--link); }
+    .sidebar h3 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+    .sidebar h3:first-of-type { margin-top: 0; }
+    .sidebar .topics {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar .topics li { margin-bottom: 0.15rem; }
+    .sidebar .topics a {
+      display: block;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.82rem;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.4rem 0.65rem;
+      border-radius: 5px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sidebar .topics a:hover {
+      background: var(--sidebar-active);
+      color: var(--heading);
+    }
+    .sidebar .topics a.active {
+      background: var(--sidebar-active);
+      color: var(--heading);
+      font-weight: 600;
+    }
+    .sidebar .topic-count {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-left: 0.3rem;
+    }
+
+    /* main content */
+    .main {
+      padding: 2.5rem 2rem;
+      max-width: 760px;
+    }
+    .main h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 2rem 0 0.75rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .main h2:first-child { margin-top: 0; }
+
+    /* paper cards */
+    .paper-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 0.75rem;
+      text-decoration: none;
+      display: block;
+      transition: box-shadow 0.15s;
+    }
+    .paper-card:hover {
+      box-shadow: 0 2px 8px rgba(51,48,46,0.08);
+    }
+    .paper-card .card-title {
+      font-family: 'Georgia', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 0.3rem;
+    }
+    .paper-card:hover .card-title { color: var(--heading); }
+    .paper-card .card-meta {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .paper-card .card-meta .tag {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.12rem 0.4rem;
+      border-radius: 3px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      margin-right: 0.25rem;
+    }
+    .paper-card .card-desc {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* empty state */
+    .coming-soon {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 1rem 0;
+    }
+
+    /* footer */
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .sidebar-footer a { color: var(--link); text-decoration: none; }
+    .sidebar-footer a:hover { color: var(--link-hover); }
   </style>
 </head>
 <body>
-  <div class="index-header">
-    <h1>Paper Summaries</h1>
-    <p>Structured summaries of research papers &mdash; key findings, chapter breakdowns, and practical implications.</p>
-  </div>
+  <div class="hub">
 
-  <ul class="paper-list">
-    <li class="paper-entry">
-      <a href="mjepa-audio-visual-ssl.html">MJEPA: A Simple and Scalable Joint-Embedding Predictive Architecture for Audio-Visual Learning</a>
-      <div class="entry-meta">
-        <span class="tag">Self-Supervised Learning</span>
-        <span class="tag">Audio-Visual</span>
-        Teotia et al. &middot; FAIR at Meta &amp; NYU &middot; 2025
+    <aside class="sidebar">
+      <h1>Papers</h1>
+      <p class="subtitle">Research paper summaries</p>
+
+      <h3>Topics</h3>
+      <ul class="topics">
+        <li><a href="#all" class="active" data-filter="all">All papers <span class="topic-count" id="count-all"></span></a></li>
+        <li><a href="#self-supervised-learning" data-filter="self-supervised-learning">Self-Supervised Learning <span class="topic-count" id="count-self-supervised-learning"></span></a></li>
+        <li><a href="#audio-visual" data-filter="audio-visual">Audio-Visual <span class="topic-count" id="count-audio-visual"></span></a></li>
+        <li><a href="#nlp" data-filter="nlp">NLP <span class="topic-count" id="count-nlp"></span></a></li>
+        <li><a href="#recommender-systems" data-filter="recommender-systems">Recommender Systems <span class="topic-count" id="count-recommender-systems"></span></a></li>
+        <li><a href="#agents" data-filter="agents">Agents &amp; Reasoning <span class="topic-count" id="count-agents"></span></a></li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <a href="https://github.com/ChristophePM/papers">GitHub</a>
       </div>
-      <div class="entry-desc">A single shared ViT encoder for audio and video, using cross-modal JEPA prediction. Frozen ViT-g beats prior baselines by +6.8 mAP on AudioSet-20K.</div>
-    </li>
-  </ul>
+    </aside>
 
-  <div class="footer">
-    <a href="https://github.com/ChristophePM/papers">GitHub</a>
+    <main class="main">
+
+      <h2 id="section-all">All Papers</h2>
+
+      <!-- === PAPER ENTRIES === -->
+      <!-- To add a new paper: copy a paper-card block, update href/title/meta/desc, add data-topics -->
+
+      <a class="paper-card" href="mjepa-audio-visual-ssl.html" data-topics="self-supervised-learning audio-visual">
+        <div class="card-title">MJEPA: A Simple and Scalable Joint-Embedding Predictive Architecture for Audio-Visual Learning</div>
+        <div class="card-meta">
+          <span class="tag">Self-Supervised Learning</span>
+          <span class="tag">Audio-Visual</span>
+          Teotia et al. &middot; FAIR at Meta &amp; NYU &middot; 2025
+        </div>
+        <div class="card-desc">A single shared ViT encoder for audio and video using cross-modal JEPA prediction. Frozen ViT-g beats prior baselines by +6.8 mAP on AudioSet-20K — trained from scratch, no ImageNet pretraining.</div>
+      </a>
+
+      <!-- === END PAPER ENTRIES === -->
+
+    </main>
   </div>
+
+  <script>
+    (function () {
+      var cards = document.querySelectorAll('.paper-card');
+      var links = document.querySelectorAll('.sidebar .topics a');
+
+      // count papers per topic
+      var counts = {};
+      cards.forEach(function (c) {
+        var topics = (c.getAttribute('data-topics') || '').split(' ');
+        topics.forEach(function (t) {
+          if (t) counts[t] = (counts[t] || 0) + 1;
+        });
+      });
+      document.getElementById('count-all').textContent = '(' + cards.length + ')';
+      Object.keys(counts).forEach(function (t) {
+        var el = document.getElementById('count-' + t);
+        if (el) el.textContent = '(' + counts[t] + ')';
+      });
+
+      // filter
+      links.forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          var filter = this.getAttribute('data-filter');
+          links.forEach(function (l) { l.classList.remove('active'); });
+          this.classList.add('active');
+
+          cards.forEach(function (c) {
+            if (filter === 'all') {
+              c.style.display = '';
+            } else {
+              var topics = (c.getAttribute('data-topics') || '').split(' ');
+              c.style.display = topics.indexOf(filter) >= 0 ? '' : 'none';
+            }
+          });
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
