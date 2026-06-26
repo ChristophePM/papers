@@ -129,16 +129,15 @@
 
     /* paper cards */
     .paper-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 0;
       margin-bottom: 0.75rem;
       text-decoration: none;
       display: block;
       transition: box-shadow 0.15s;
     }
     .paper-card:hover {
-      box-shadow: 0 2px 8px rgba(51,48,46,0.08);
+      opacity: 0.85;
     }
     .paper-card .card-title {
       font-family: 'Georgia', serif;
@@ -262,12 +261,16 @@
       });
 
       // filter
+      var heading = document.getElementById('section-all');
       links.forEach(function (link) {
         link.addEventListener('click', function (e) {
           e.preventDefault();
           var filter = this.getAttribute('data-filter');
           links.forEach(function (l) { l.classList.remove('active'); });
           this.classList.add('active');
+
+          // update heading to match selected topic
+          heading.textContent = filter === 'all' ? 'All Papers' : this.textContent.replace(/\s*\(\d+\)\s*$/, '');
 
           cards.forEach(function (c) {
             if (filter === 'all') {
