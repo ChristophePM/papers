@@ -4,12 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paper Summaries</title>
-  <link rel="stylesheet" href="styles.css">
   <style>
-    body { padding: 3rem 1.5rem; max-width: 760px; margin: 0 auto; }
-    .index-header { border-bottom: 4px solid var(--text); padding-bottom: 1rem; margin-bottom: 2rem; }
+    :root {
+      --bg: #FFF1E5;
+      --surface: #FFFFFF;
+      --border: #E6D9CE;
+      --text: #33302E;
+      --text-muted: #807973;
+      --heading: #0D7680;
+      --accent: #990F3D;
+      --link: #0D7680;
+      --tag-bg: #EBF1F1;
+      --tag-text: #0D7680;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+      padding: 3rem 1.5rem;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .index-header {
+      border-bottom: 4px solid var(--text);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
     .index-header h1 { font-size: 2rem; }
-    .index-header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; }
+    .index-header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
     .paper-list { list-style: none; padding: 0; }
     .paper-entry {
       border-bottom: 1px solid var(--border);
@@ -47,12 +76,22 @@
       color: var(--text);
       margin-top: 0.35rem;
     }
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .footer a { color: var(--link); }
   </style>
 </head>
 <body>
   <div class="index-header">
     <h1>Paper Summaries</h1>
-    <p>Structured summaries of research papers — key findings, chapter breakdowns, and practical implications.</p>
+    <p>Structured summaries of research papers &mdash; key findings, chapter breakdowns, and practical implications.</p>
   </div>
 
   <ul class="paper-list">
@@ -67,7 +106,7 @@
     </li>
   </ul>
 
-  <div class="paper-footer">
+  <div class="footer">
     <a href="https://github.com/ChristophePM/papers">GitHub</a>
   </div>
 </body>

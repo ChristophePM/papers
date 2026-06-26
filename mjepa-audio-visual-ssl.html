@@ -4,12 +4,345 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MJEPA — Paper Summary</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --bg: #FFF1E5;
+      --surface: #FFFFFF;
+      --surface-alt: #F6E9DD;
+      --border: #E6D9CE;
+      --text: #33302E;
+      --text-muted: #807973;
+      --heading: #0D7680;
+      --accent: #990F3D;
+      --link: #0D7680;
+      --link-hover: #065459;
+      --tag-bg: #EBF1F1;
+      --tag-text: #0D7680;
+      --highlight-bg: #FCF0E8;
+      --metric: #0D7680;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* layout */
+    .page {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      max-width: 1100px;
+      margin: 0 auto;
+      gap: 2.5rem;
+      padding: 2rem 1.5rem;
+    }
+    @media (max-width: 800px) {
+      .page { grid-template-columns: 1fr; }
+      .toc-rail { display: none; }
+    }
+    .content { min-width: 0; }
+
+    /* header */
+    .paper-header {
+      border-bottom: 4px solid var(--text);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .paper-header h1 {
+      font-family: 'Georgia', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+    .paper-header .authors {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    .paper-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .paper-meta .tag {
+      display: inline-block;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 3px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+    }
+    .paper-meta .tag.difficulty {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* source box */
+    .source-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--heading);
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.85rem;
+    }
+    .source-box .source-label {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .source-box a {
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px solid var(--link);
+    }
+    .source-box a:hover {
+      color: var(--link-hover);
+      border-color: var(--link-hover);
+    }
+
+    /* tl;dr */
+    .tldr {
+      background: var(--highlight-bg);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .tldr strong { color: var(--accent); }
+    .tldr-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* sticky TOC */
+    .toc-rail {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      max-height: calc(100vh - 3rem);
+      overflow-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.78rem;
+      padding-right: 1rem;
+    }
+    .toc-rail h3 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+    .toc-rail ul { list-style: none; padding: 0; }
+    .toc-rail li { margin-bottom: 0.5rem; line-height: 1.4; }
+    .toc-rail a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .toc-rail a:hover,
+    .toc-rail a.active {
+      color: var(--heading);
+      font-weight: 600;
+    }
+
+    /* sections */
+    h2 {
+      font-family: 'Georgia', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 2.5rem 0 0.75rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 1.5rem 0 0.5rem;
+    }
+    p { margin-bottom: 0.75rem; }
+    a { color: var(--link); }
+    a:hover { color: var(--link-hover); }
+
+    /* key takeaways */
+    .takeaways {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin: 1rem 0 2rem;
+      counter-reset: takeaway;
+    }
+    .takeaways h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+    .takeaway {
+      display: flex;
+      gap: 0.85rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+    .takeaway:last-child { border-bottom: none; }
+    .takeaway::before {
+      counter-increment: takeaway;
+      content: counter(takeaway);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--tag-bg);
+      color: var(--heading);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .takeaway a.ref {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--link);
+      margin-left: 0.25rem;
+      white-space: nowrap;
+    }
+    .takeaway a.ref:hover { border-bottom-style: solid; }
+
+    /* metrics grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0 2rem;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1rem;
+    }
+    .metric-card .value {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--metric);
+    }
+    .metric-card .label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+    .metric-card .detail {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text);
+      margin-top: 0.5rem;
+    }
+
+    /* collapsible chapters */
+    details.chapter {
+      margin: 1rem 0;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    details.chapter summary {
+      padding: 0.85rem 1.25rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--heading);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    details.chapter summary::before {
+      content: '\25B6';
+      font-size: 0.6rem;
+      transition: transform 0.2s;
+    }
+    details.chapter[open] summary::before { transform: rotate(90deg); }
+    details.chapter summary::-webkit-details-marker { display: none; }
+    details.chapter .chapter-body {
+      padding: 0 1.25rem 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    /* so-what box */
+    .so-what {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+    }
+    .so-what .so-what-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* conclusion */
+    .conclusion {
+      border-top: 2px solid var(--text);
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+    }
+
+    /* lists */
+    ul, ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+    li { margin-bottom: 0.35rem; font-size: 0.92rem; }
+
+    /* footer */
+    .paper-footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    @media print {
+      .toc-rail { display: none; }
+      .page { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
   <div class="page">
 
-    <!-- ====== sticky TOC ====== -->
     <nav class="toc-rail">
       <h3>Contents</h3>
       <ul>
@@ -23,14 +356,10 @@
         <li><a href="#conclusion">Conclusion</a></li>
         <li><a href="#so-what">So What?</a></li>
       </ul>
-      <br>
-      <a href="index.html" style="font-size:0.72rem;">&larr; All papers</a>
     </nav>
 
-    <!-- ====== content ====== -->
     <div class="content">
 
-      <!-- header -->
       <div class="paper-header">
         <h1>MJEPA: A Simple and Scalable Joint-Embedding Predictive Architecture for Audio-Visual Learning</h1>
         <p class="authors">Revant Teotia, Adrien Bardes, Michael Rabbat, Sumit Chopra, Matthew Muckley, Nicolas Ballas &mdash; FAIR at Meta &amp; NYU</p>
@@ -43,45 +372,36 @@
         </div>
       </div>
 
-      <!-- source box -->
       <div class="source-box">
         <div class="source-label">Source</div>
         <a href="https://arxiv.org/abs/2606.25225v1">arXiv:2606.25225v1</a> &middot;
         <a href="https://arxiv.org/html/2606.25225v1">HTML version</a>
       </div>
 
-      <!-- TL;DR -->
       <div class="tldr" id="tldr">
         <div class="tldr-label">TL;DR</div>
         <p>MJEPA extends Joint-Embedding Predictive Architectures to audio-visual learning using a <strong>single unified encoder</strong> for both modalities. The critical insight: a shared encoder <em>hurts</em> without cross-modal prediction, but with it each modality boosts the other. A frozen ViT-g beats prior frozen baselines by over <strong>+6.8 mAP</strong> on AudioSet-20K &mdash; trained entirely from scratch, no ImageNet pretraining.</p>
       </div>
 
-      <!-- key takeaways -->
       <div class="takeaways" id="takeaways">
         <h2 style="margin-top:0;border:none;padding:0;">Key Takeaways</h2>
-
         <div class="takeaway">
           <div><strong>Shared encoders fail without alignment.</strong> A naive shared encoder degraded both modalities below unimodal baselines, contradicting the intuition that parameter sharing automatically helps. <a class="ref" href="#ch-ablation">&rarr; Ablation</a></div>
         </div>
-
         <div class="takeaway">
           <div><strong>Cross-modal prediction is the critical ingredient.</strong> Adding lightweight MLP-based alignment flipped the architecture from harmful to beneficial &mdash; audio mAP jumped from 28.70 to 33.52. <a class="ref" href="#ch-architecture">&rarr; Architecture</a></div>
         </div>
-
         <div class="takeaway">
           <div><strong>Frozen representations beat finetuned baselines.</strong> On ESC-50 (96.9%) and FSD50K (65.8 mAP), frozen MJEPA surpasses even finetuned prior methods like EquiAV. <a class="ref" href="#ch-results">&rarr; Results</a></div>
         </div>
-
         <div class="takeaway">
           <div><strong>Scales cleanly to 1B parameters.</strong> The framework handles heterogeneous data (mixed unimodal + multimodal) and scales to ViT-g with simultaneous gains across all benchmarks. <a class="ref" href="#ch-ablation">&rarr; Ablation</a></div>
         </div>
-
         <div class="takeaway">
           <div><strong>Simplicity wins.</strong> No contrastive losses, no reconstruction objectives, no heavy augmentations, no pretrained initialization &mdash; just prediction. <a class="ref" href="#ch-comparison">&rarr; vs. Prior Work</a></div>
         </div>
       </div>
 
-      <!-- metrics -->
       <div id="metrics">
         <h2>Headline Metrics</h2>
         <div class="metrics-grid">
@@ -118,24 +438,19 @@
         </div>
       </div>
 
-      <!-- chapter: architecture -->
       <details class="chapter" open id="ch-architecture">
         <summary>Core Architecture</summary>
         <div class="chapter-body">
           <p>Unlike prior audio-visual self-supervised methods that use separate modality-specific encoders with complex loss combinations, MJEPA employs deliberate simplicity with three components:</p>
-
           <h3>1. Unified Encoder</h3>
           <p>A single Vision Transformer processes audio, video, or combined audio-video inputs through shared weights. Only the tokenization layers (patch embedding) and positional embeddings are modality-specific &mdash; everything else is shared.</p>
-
           <h3>2. Intra-Modal Prediction</h3>
           <p>Standard JEPA masking applied independently within each modality: predict masked token representations from visible context using L1 distance loss. Multi-level features from several encoder layers are fused for richer hierarchical representations.</p>
-
           <h3>3. Cross-Modal Prediction</h3>
           <p>Lightweight MLPs predict pooled last-layer features across modalities (audio&rarr;video, video&rarr;audio, audio&harr;audio-video). Global pooling is used because there is no natural token-level correspondence between audio and video. This alignment objective is what transforms the shared encoder from harmful to beneficial &mdash; the paper's central contribution.</p>
         </div>
       </details>
 
-      <!-- chapter: ablation -->
       <details class="chapter" id="ch-ablation">
         <summary>Progressive Ablation</summary>
         <div class="chapter-body">
@@ -152,22 +467,18 @@
         </div>
       </details>
 
-      <!-- chapter: results -->
       <details class="chapter" id="ch-results">
         <summary>Main Results</summary>
         <div class="chapter-body">
           <h3>Audio-Visual (AudioSet-20K)</h3>
           <p>Frozen evaluation SOTA at 45.44 mAP (audio-video combined), outperforming previous best (EquiAV) by 4.3&ndash;6.8 mAP across modalities. Notably, the frozen video-only result (29.63) surpasses all reported <em>finetuned</em> baselines.</p>
-
           <h3>Audio-Only Tasks</h3>
           <p>Sets frozen representation SOTA across ESC-50 (96.9% accuracy) and FSD50K (65.8 mAP). Both numbers exceed finetuned EquiAV results, demonstrating strong positive transfer from video data improving audio representations.</p>
-
           <h3>Video-Only Tasks</h3>
           <p>Competitive with VJEPA2 despite using 10&times; less video data: Kinetics-400 at 85.0% (vs 86.6%) and Something-Something-v2 at 73.9% (vs 75.3%). Audio-video training provides a complementary learning signal that benefits video representations.</p>
         </div>
       </details>
 
-      <!-- chapter: comparison -->
       <details class="chapter" id="ch-comparison">
         <summary>What Makes This Different</summary>
         <div class="chapter-body">
@@ -182,26 +493,44 @@
         </div>
       </details>
 
-      <!-- conclusion -->
       <div class="conclusion" id="conclusion">
         <h2>Conclusion</h2>
         <p>MJEPA demonstrates that a single, shared-weight Vision Transformer can learn strong audio-visual representations through prediction alone &mdash; no contrastive losses, reconstruction, or pretrained weights needed. The key enabler is cross-modal prediction: without it, shared encoders underperform; with it, modalities synergize. The approach scales smoothly to 1B parameters and sets new SOTA on frozen evaluation across audio, video, and audio-visual benchmarks.</p>
       </div>
 
-      <!-- so what -->
       <div class="so-what" id="so-what">
         <div class="so-what-label">So What?</div>
         <p>This is a proof-of-concept for <strong>truly modality-agnostic architectures</strong>. If one encoder with one objective can handle audio + video better than specialized pipelines, the same pattern could extend to medical imaging (CT + MRI), robotics (vision + proprioception), or any domain where multiple data streams naturally co-occur. The simplicity makes it practical to scale and adapt &mdash; fewer moving parts means fewer things to tune.</p>
       </div>
 
-      <!-- footer -->
       <div class="paper-footer">
-        Summary generated 2026-06-26 &middot; <a href="index.html">&larr; All papers</a>
+        Summary generated 2026-06-26 &middot; source: <a href="https://arxiv.org/abs/2606.25225v1">arXiv:2606.25225v1</a>
       </div>
 
-    </div><!-- /content -->
-  </div><!-- /page -->
+    </div>
+  </div>
 
-  <script src="toc.js"></script>
+  <script>
+    (function () {
+      var links = document.querySelectorAll('.toc-rail a');
+      if (!links.length) return;
+      var sections = Array.from(links).map(function(a) {
+        var id = a.getAttribute('href');
+        return id ? document.querySelector(id) : null;
+      }).filter(Boolean);
+      function update() {
+        var current = sections[0];
+        for (var i = 0; i < sections.length; i++) {
+          if (sections[i].getBoundingClientRect().top <= 80) current = sections[i];
+        }
+        links.forEach(function(a) {
+          var id = a.getAttribute('href').replace('#', '');
+          a.classList.toggle('active', id === (current && current.id));
+        });
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+  </script>
 </body>
 </html>
