@@ -8,6 +8,7 @@
     :root {
       --bg: #FFF1E5;
       --surface: #FFFFFF;
+      --surface-alt: #F6E9DD;
       --border: #E6D9CE;
       --text: #33302E;
       --text-muted: #807973;
@@ -129,8 +130,9 @@
 
     /* paper cards */
     .paper-card {
-      border-bottom: 1px solid var(--border);
-      padding: 1.25rem 0;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
       margin-bottom: 0.75rem;
       text-decoration: none;
       display: block;
