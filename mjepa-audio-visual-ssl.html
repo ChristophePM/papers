@@ -7,8 +7,6 @@
   <style>
     :root {
       --bg: #FFF1E5;
-      --surface: #FFFFFF;
-      --surface-alt: #F6E9DD;
       --border: #E6D9CE;
       --text: #33302E;
       --text-muted: #807973;
@@ -19,7 +17,8 @@
       --tag-bg: #EBF1F1;
       --tag-text: #0D7680;
       --highlight-bg: #FCF0E8;
-      --metric: #0D7680;
+      --sidebar-bg: #F6E9DD;
+      --sidebar-active: #FFFFFF;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
@@ -31,20 +30,109 @@
       font-size: 16px;
     }
 
-    /* layout */
+    /* layout: sidebar + content */
     .page {
       display: grid;
-      grid-template-columns: 220px 1fr;
-      max-width: 1100px;
-      margin: 0 auto;
-      gap: 2.5rem;
-      padding: 2rem 1.5rem;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
     }
     @media (max-width: 800px) {
       .page { grid-template-columns: 1fr; }
-      .toc-rail { display: none; }
+      .sidebar {
+        position: static !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem !important;
+      }
     }
-    .content { min-width: 0; }
+
+    /* sidebar */
+    .sidebar {
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.25rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .sidebar h1 {
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+    .sidebar h1 a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .sidebar h1 a:hover { color: var(--heading); }
+    .sidebar .subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .sidebar h3 {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+    .sidebar h3:first-of-type { margin-top: 0; }
+    .sidebar ul { list-style: none; padding: 0; }
+    .sidebar li { margin-bottom: 0.15rem; }
+    .sidebar .nav-link {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 5px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sidebar .nav-link:hover {
+      background: var(--sidebar-active);
+      color: var(--heading);
+    }
+    .sidebar .nav-link.active {
+      background: var(--sidebar-active);
+      color: var(--heading);
+      font-weight: 600;
+    }
+    .sidebar .toc-section { margin-top: 1.5rem; }
+    .sidebar .toc-link {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.25rem 0.65rem;
+      border-radius: 5px;
+      transition: color 0.15s;
+    }
+    .sidebar .toc-link:hover,
+    .sidebar .toc-link.active {
+      color: var(--heading);
+      font-weight: 600;
+    }
+    .sidebar-footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .sidebar-footer a { color: var(--link); text-decoration: none; }
+
+    /* content */
+    .content {
+      padding: 2.5rem 2.5rem;
+      max-width: 800px;
+    }
 
     /* header */
     .paper-header {
@@ -109,10 +197,7 @@
       text-decoration: none;
       border-bottom: 1px solid var(--link);
     }
-    .source-box a:hover {
-      color: var(--link-hover);
-      border-color: var(--link-hover);
-    }
+    .source-box a:hover { color: var(--link-hover); border-color: var(--link-hover); }
 
     /* tl;dr */
     .tldr {
@@ -131,38 +216,6 @@
       letter-spacing: 0.06em;
       color: var(--accent);
       margin-bottom: 0.4rem;
-    }
-
-    /* sticky TOC */
-    .toc-rail {
-      position: sticky;
-      top: 1.5rem;
-      align-self: start;
-      max-height: calc(100vh - 3rem);
-      overflow-y: auto;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 0.78rem;
-      padding-right: 1rem;
-    }
-    .toc-rail h3 {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-      font-weight: 700;
-    }
-    .toc-rail ul { list-style: none; padding: 0; }
-    .toc-rail li { margin-bottom: 0.5rem; line-height: 1.4; }
-    .toc-rail a {
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-    .toc-rail a:hover,
-    .toc-rail a.active {
-      color: var(--heading);
-      font-weight: 600;
     }
 
     /* sections */
@@ -244,7 +297,7 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 1.5rem;
       font-weight: 700;
-      color: var(--metric);
+      color: var(--heading);
     }
     .metric-card .label {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -260,10 +313,7 @@
     }
 
     /* chapters */
-    .chapter {
-      margin: 0.5rem 0 2rem;
-      font-size: 0.92rem;
-    }
+    .chapter { margin: 0.5rem 0 2rem; font-size: 0.92rem; }
 
     /* so-what */
     .so-what {
@@ -304,7 +354,7 @@
     }
 
     @media print {
-      .toc-rail { display: none; }
+      .sidebar { display: none; }
       .page { grid-template-columns: 1fr; }
     }
   </style>
@@ -312,30 +362,46 @@
 <body>
   <div class="page">
 
-    <nav class="toc-rail">
-      <h3>Contents</h3>
-      <ul>
-        <li><a href="#tldr">TL;DR</a></li>
-        <li><a href="#takeaways">Key Takeaways</a></li>
-        <li><a href="#metrics">Metrics</a></li>
-        <li><a href="#ch-architecture">Architecture</a></li>
-        <li><a href="#ch-ablation">Progressive Ablation</a></li>
-        <li><a href="#ch-results">Main Results</a></li>
-        <li><a href="#ch-comparison">vs. Prior Work</a></li>
-        <li><a href="#conclusion">Conclusion</a></li>
-        <li><a href="#so-what">So What?</a></li>
-      </ul>
-    </nav>
+    <!-- ====== persistent sidebar ====== -->
+    <aside class="sidebar">
+      <h1><a href="index.html">Papers</a></h1>
+      <p class="subtitle">Research paper summaries</p>
 
+      <h3>All Papers</h3>
+      <ul>
+        <li><a class="nav-link active" href="mjepa-audio-visual-ssl.html">MJEPA: Audio-Visual JEPA</a></li>
+      </ul>
+
+      <div class="toc-section">
+        <h3>This Paper</h3>
+        <ul>
+          <li><a class="toc-link" href="#tldr">TL;DR</a></li>
+          <li><a class="toc-link" href="#takeaways">Key Takeaways</a></li>
+          <li><a class="toc-link" href="#metrics">Metrics</a></li>
+          <li><a class="toc-link" href="#ch-architecture">Architecture</a></li>
+          <li><a class="toc-link" href="#ch-ablation">Progressive Ablation</a></li>
+          <li><a class="toc-link" href="#ch-results">Main Results</a></li>
+          <li><a class="toc-link" href="#ch-comparison">vs. Prior Work</a></li>
+          <li><a class="toc-link" href="#conclusion">Conclusion</a></li>
+          <li><a class="toc-link" href="#so-what">So What?</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="https://github.com/ChristophePM/papers">GitHub</a>
+      </div>
+    </aside>
+
+    <!-- ====== content ====== -->
     <div class="content">
 
       <div class="paper-header">
         <h1>MJEPA: A Simple and Scalable Joint-Embedding Predictive Architecture for Audio-Visual Learning</h1>
         <p class="authors">Revant Teotia, Adrien Bardes, Michael Rabbat, Sumit Chopra, Matthew Muckley, Nicolas Ballas &mdash; FAIR at Meta &amp; NYU</p>
         <div class="paper-meta">
+          <span class="tag">Computer Science</span>
           <span class="tag">Self-Supervised Learning</span>
           <span class="tag">Audio-Visual</span>
-          <span class="tag">ViT up to 1B params</span>
           <span class="tag">2025</span>
           <span class="tag difficulty">Technical</span>
         </div>
@@ -473,7 +539,7 @@
 
   <script>
     (function () {
-      var links = document.querySelectorAll('.toc-rail a');
+      var links = document.querySelectorAll('.toc-link');
       if (!links.length) return;
       var sections = Array.from(links).map(function(a) {
         var id = a.getAttribute('href');
