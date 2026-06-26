@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIDER 2026 — Roundtable Notes</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface-hover: #222632;
+      --border: #2a2e3a;
+      --text: #e4e6ed;
+      --text-muted: #8b8fa3;
+      --accent: #6c8cff;
+      --accent-dim: rgba(108, 140, 255, 0.12);
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.12);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251, 191, 36, 0.12);
+      --rose: #fb7185;
+      --rose-dim: rgba(251, 113, 133, 0.12);
+      --purple: #c084fc;
+      --purple-dim: rgba(192, 132, 252, 0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 3rem;
+    }
+
+    .header .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      margin-bottom: 1rem;
+    }
+
+    .header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .header .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 640px;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .meta-bar span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .meta-bar .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Takeaways grid */
+    .takeaways {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .takeaway {
+      padding: 1.25rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: background 0.15s;
+    }
+
+    .takeaway:hover { background: var(--surface-hover); }
+
+    .takeaway .number {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .takeaway h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .takeaway p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .takeaway.blue   .number { color: var(--accent); }
+    .takeaway.green  .number { color: var(--green); }
+    .takeaway.amber  .number { color: var(--amber); }
+    .takeaway.rose   .number { color: var(--rose); }
+    .takeaway.purple .number { color: var(--purple); }
+
+    .takeaway.blue   { border-color: rgba(108,140,255,0.18); }
+    .takeaway.green  { border-color: rgba(74,222,128,0.18); }
+    .takeaway.amber  { border-color: rgba(251,191,36,0.18); }
+    .takeaway.rose   { border-color: rgba(251,113,133,0.18); }
+    .takeaway.purple { border-color: rgba(192,132,252,0.18); }
+
+    /* Section */
+    .section {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-header .icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .section-header h2 {
+      font-size: 1.2rem;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    .section-body {
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .section-body p { margin-bottom: 0.85rem; }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body strong { color: var(--text); font-weight: 600; }
+
+    .section-body ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+    }
+
+    .section-body li {
+      position: relative;
+      padding-left: 1.2rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .section-body li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .icon-blue   { background: var(--accent-dim);  color: var(--accent); }
+    .icon-green  { background: var(--green-dim);   color: var(--green); }
+    .icon-amber  { background: var(--amber-dim);   color: var(--amber); }
+    .icon-purple { background: var(--purple-dim);   color: var(--purple); }
+    .icon-rose   { background: var(--rose-dim);    color: var(--rose); }
+
+    /* Participants */
+    .participants {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.3rem 0.7rem;
+      border-radius: 100px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(108,140,255,0.15);
+    }
+
+    .chip.academia {
+      background: var(--purple-dim);
+      color: var(--purple);
+      border-color: rgba(192,132,252,0.15);
+    }
+
+    /* Source link */
+    .source {
+      margin-top: 3rem;
+      text-align: center;
+    }
+
+    .source a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 0.6rem 1.25rem;
+      border: 1px solid rgba(108,140,255,0.25);
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+
+    .source a:hover { background: var(--accent-dim); }
+
+    @media (max-width: 640px) {
+      .container { padding: 2rem 1.25rem 4rem; }
+      .header h1 { font-size: 1.6rem; }
+      .takeaways { grid-template-columns: 1fr; }
+      .meta-bar { flex-direction: column; gap: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <span class="badge">Research Notes</span>
+      <h1>CIDER 2026</h1>
+      <p class="subtitle">Causal Inference and Digital Experimentation Roundtable &mdash; invite-only discussions on experimentation, causal inference, and AI evaluation hosted by Netflix.</p>
+
+      <div class="meta-bar">
+        <span><span class="dot"></span> Chatham House Rules</span>
+        <span>Spotify attendees: M&aring;rten Schultzberg, Kyle Kretschman</span>
+        <span>Authors: M&aring;rten Schultzberg</span>
+      </div>
+
+      <div class="participants" style="margin-top:1rem;">
+        <span class="chip">Microsoft / GitHub</span>
+        <span class="chip">Meta</span>
+        <span class="chip">Anthropic</span>
+        <span class="chip">Amazon</span>
+        <span class="chip">Roblox</span>
+        <span class="chip">Spotify</span>
+        <span class="chip">Airbnb</span>
+        <span class="chip">OpenAI</span>
+        <span class="chip">Netflix</span>
+        <span class="chip academia">UC Berkeley</span>
+        <span class="chip academia">Columbia</span>
+        <span class="chip academia">Cornell</span>
+      </div>
+    </div>
+
+    <!-- Takeaways -->
+    <h2 style="font-size:1rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem;">Key Takeaways</h2>
+
+    <div class="takeaways">
+      <div class="takeaway blue">
+        <div class="number">01 &mdash; Throughput</div>
+        <h3>Experiment velocity is the bottleneck</h3>
+        <p>Better short-term proxies, smarter stopping rules, and measurement quality are more pressing than ever as AI accelerates idea generation faster than testing can keep up.</p>
+      </div>
+      <div class="takeaway green">
+        <div class="number">02 &mdash; Metadata</div>
+        <h3>Compound learnings across experiments</h3>
+        <p>Companies want portfolio-level learning but lack high-quality metadata. AI agents could auto-enrich experiments with missing context like bet ownership and DoD mapping.</p>
+      </div>
+      <div class="takeaway amber">
+        <div class="number">03 &mdash; Eval</div>
+        <h3>Evaluating AI agents is genuinely hard</h3>
+        <p>Both Anthropic and OpenAI flagged ever-growing eval sets, flakiness, and dynamic user interactions. Evan Miller published a paper on applying basic stats to eval uncertainty.</p>
+      </div>
+      <div class="takeaway rose">
+        <div class="number">04 &mdash; Tooling</div>
+        <h3>Agents need deterministic tools</h3>
+        <p>Give agents narrow statistical packages instead of open-ended tasks. Netflix open-sourced an OCI agent for this. Aligns with Spotify's experimentation platform approach.</p>
+      </div>
+      <div class="takeaway purple">
+        <div class="number">05 &mdash; Autonomy</div>
+        <h3>Autonomous experimentation within a year</h3>
+        <p>Broad optimism that agents will set up, launch, monitor, and analyze experiments autonomously. Everyone agrees agents will at least handle planning, setup, and summarization.</p>
+      </div>
+      <div class="takeaway blue">
+        <div class="number">06 &mdash; Policy</div>
+        <h3>Inference as a utility optimization problem</h3>
+        <p>Frame alpha and power choices as business policy &mdash; weighing false positive/negative costs, harmful-variant exposure, and sample size. Ongoing PZN work supports this.</p>
+      </div>
+    </div>
+
+    <!-- Theme 1 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="icon icon-blue">1</div>
+        <h2>Moving from Outcome to Mechanism</h2>
+      </div>
+      <div class="section-body">
+        <p><strong>Core tension:</strong> launching on noisy evidence vs. genuinely learning something. When teams ship without understanding <em>why</em> a treatment worked, they risk chasing noise and building on a weak foundation.</p>
+        <p><strong>Practical challenge:</strong> distinguishing whether a treatment did what was intended from a systems perspective, or whether users simply responded positively to whatever the treatment produced. These are distinct questions that get conflated.</p>
+        <p><strong>On formal models:</strong> The consensus leaned toward encouraging structural causal thinking rather than mandating DAGs universally. The ROI of formalization scales with product maturity &mdash; when core metrics move easily, intuition is enough; at the margin, rigorous causal specification pays off.</p>
+        <p><strong>AI opportunity:</strong> Enthusiasm for using AI to extract implicit causal hypotheses from code, strategy docs, and test specs rather than requiring experimenters to write them down.</p>
+        <p><strong>Broader conclusion:</strong> Data scientists may need to become stronger theorists. Structural thinking helps teams reason about Goodhart's law and unanticipated effects, even without full formal models.</p>
+      </div>
+    </div>
+
+    <!-- Theme 2 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="icon icon-green">2</div>
+        <h2>Hybrid Evaluation Ecosystems</h2>
+      </div>
+      <div class="section-body">
+        <p><strong>Three approaches discussed:</strong></p>
+        <ul>
+          <li><strong>Pre-filter:</strong> Use LLMs to screen out bad ideas before online experimentation</li>
+          <li><strong>Augment:</strong> Combine LLM synthetic users with historical data as priors to reduce online sample size</li>
+          <li><strong>Replace:</strong> Full silicon testing with synthetic users (surprising optimism, but long-term outcomes remain a challenge)</li>
+        </ul>
+        <p><strong>What works now:</strong> LLMs show genuine promise in constrained applications &mdash; analyzing session recordings, generating personas for survey-like questions, sessionizing activity logs, and helping economists build structural models quickly. Consistent advice: give agents narrow, well-defined jobs.</p>
+        <p><strong>Key limitation:</strong> LLMs are better at interpolating than extrapolating. Simulating known behaviors is tractable; predicting responses to genuinely novel launches is much harder. Cold start is particularly resistant.</p>
+        <p><strong>Near-term consensus:</strong> A tiered system where simulation and proxy metrics filter out bad ideas before online testing &mdash; not replacing A/B testing altogether. Online experiments remain essential for guardrail functions and tuning with real traffic.</p>
+      </div>
+    </div>
+
+    <!-- Theme 3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="icon icon-amber">3</div>
+        <h2>The Shift from Analyst to System Architect</h2>
+      </div>
+      <div class="section-body">
+        <p><strong>Role bifurcation:</strong> A large population of generalist product builders using AI for analysis, surrounded by fewer deep experts building evaluation systems and guardrails. Implies fewer specialist data scientists overall.</p>
+        <p><strong>Durable core skills:</strong> Problem framing (translating ambiguous business problems into well-formed questions) and answer validation (checking an output actually addresses the question) were repeatedly cited as the enduring human contribution.</p>
+        <p><strong>Soft skills debate:</strong> Some argued communication remains essential for influencing decision-makers. Others countered that if agents write for agents, traditional persuasion may erode. A sharp point: much of "soft skills" is navigating principal-agent problems &mdash; if AI gains full org context, those frictions may dissolve.</p>
+        <p><strong>Junior pipeline problem:</strong> Junior hiring has already contracted at several companies, with some teams replacing junior DS with AI tools. The skills that make senior people effective were developed through exactly the low-level work AI is now automating. How the next generation develops judgment is an open question.</p>
+        <p><strong>For academia:</strong> Focus on critical thinking and skepticism &mdash; the ability to identify what's wrong with an analysis quickly. Deep implementation knowledge matters less; interrogating and validating outputs matters more.</p>
+      </div>
+    </div>
+
+    <!-- Theme 4 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="icon icon-purple">4</div>
+        <h2>Evaluating AI Products &amp; Non-Determinism</h2>
+      </div>
+      <div class="section-body">
+        <p><strong>Framing:</strong> Fundamentally a measurement problem, not an experimental design problem. A/B testing and always-valid inference remain sound; what's hard is defining success for products with enormous user journey spaces.</p>
+        <p><strong>Not entirely new:</strong> Non-determinism and high-dimensional product spaces existed in search and recommendation. But the pace and dimensionality have increased to a point where existing tooling can't keep up without major investment.</p>
+        <p><strong>Specific challenges:</strong></p>
+        <ul>
+          <li>High-dimensional outcome spaces where metric count scales with product complexity</li>
+          <li>Heterogeneous user interactions with no clean counterfactual</li>
+          <li>Continuously changing models making results non-generalizable across time</li>
+          <li>Users simultaneously updating their own expectations and skills</li>
+        </ul>
+        <p><strong>Quality guardrails:</strong> Because AI failure modes are categorically different from bad recommendations, continuous monitoring beyond A/B test windows is essential. LLM-as-judge scales qualitative evaluation, but keeping human ratings fresh is an open problem.</p>
+        <p><strong>Call to action:</strong> Academics urged practitioners to publish more on real-world AI measurement challenges. Academic work is almost entirely focused on benchmarks and is far behind what industry is grappling with. More industry-academia collaboration on causal evaluation of deployed AI systems was described as a major research opportunity.</p>
+      </div>
+    </div>
+
+    <!-- Spotlight -->
+    <div class="section">
+      <div class="section-header">
+        <div class="icon icon-rose">&#9733;</div>
+        <h2>Spotlight: Spotify's Experimentation Platform</h2>
+      </div>
+      <div class="section-body">
+        <p>Travis Brooks (Netflix) interviewed M&aring;rten Schultzberg about Spotify's decision to sell its internal experimentation platform externally. No detailed notes taken for this session.</p>
+      </div>
+    </div>
+
+    <!-- Challenges roundtable -->
+    <div class="section">
+      <div class="section-header">
+        <div class="icon icon-blue">&#8734;</div>
+        <h2>Open Challenges (Roundtable)</h2>
+      </div>
+      <div class="section-body">
+        <ul>
+          <li><strong>Velocity vs. validity:</strong> AI accelerates idea generation but experiments remain slow &mdash; pressure to ship faster risks "throwing things at the wall"</li>
+          <li><strong>Metric sensitivity:</strong> North star metrics lose sensitivity as products mature, making meaningful changes harder to detect</li>
+          <li><strong>Long-term measurement:</strong> Can't run holdouts for months; teams launch without metadata to evaluate decisions retrospectively</li>
+          <li><strong>Independence assumptions:</strong> Classical A/B testing breaks down with model spillover and marketplace interference effects</li>
+          <li><strong>Portfolio learning:</strong> How to learn across thousands of experiments and use accumulated knowledge to guide what to test next</li>
+          <li><strong>Regression detection:</strong> Shipping a worse model without catching it is a near-nightmare scenario; choosing the right eval subset is its own hard problem</li>
+          <li><strong>Agent autonomy:</strong> No clear framework for how much autonomy to grant agents in interpreting results and making recommendations</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="source">
+      <a href="https://docs.google.com/document/d/1mWsWydR_ycoTE5KY_teoAFlfUjyxlf08RJIaM2E8oU8/edit" target="_blank">
+        Open original Google Doc &rarr;
+      </a>
+    </div>
+
+  </div>
+</body>
+</html>

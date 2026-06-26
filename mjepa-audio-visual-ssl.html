@@ -90,8 +90,6 @@
 
     /* source box */
     .source-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
       border-left: 4px solid var(--heading);
       padding: 1rem 1.25rem;
       margin-bottom: 2rem;
@@ -190,9 +188,7 @@
 
     /* key takeaways */
     .takeaways {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 1.5rem;
+      padding: 0;
       margin: 1rem 0 2rem;
       counter-reset: takeaway;
     }
@@ -241,9 +237,8 @@
       margin: 1rem 0 2rem;
     }
     .metric-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 1rem;
+      border-bottom: 2px solid var(--heading);
+      padding: 1rem 0.5rem;
     }
     .metric-card .value {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -264,42 +259,16 @@
       margin-top: 0.5rem;
     }
 
-    /* collapsible chapters */
-    details.chapter {
-      margin: 1rem 0;
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
-    details.chapter summary {
-      padding: 0.85rem 1.25rem;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--heading);
-      cursor: pointer;
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    details.chapter summary::before {
-      content: '\25B6';
-      font-size: 0.6rem;
-      transition: transform 0.2s;
-    }
-    details.chapter[open] summary::before { transform: rotate(90deg); }
-    details.chapter summary::-webkit-details-marker { display: none; }
-    details.chapter .chapter-body {
-      padding: 0 1.25rem 1.25rem;
-      font-size: 0.9rem;
+    /* chapters */
+    .chapter {
+      margin: 0.5rem 0 2rem;
+      font-size: 0.92rem;
     }
 
-    /* so-what box */
+    /* so-what */
     .so-what {
-      background: var(--surface);
-      border: 1px solid var(--border);
       border-top: 3px solid var(--accent);
-      padding: 1.25rem 1.5rem;
+      padding: 1.25rem 0;
       margin: 2rem 0;
     }
     .so-what .so-what-label {
@@ -438,60 +407,52 @@
         </div>
       </div>
 
-      <details class="chapter" open id="ch-architecture">
-        <summary>Core Architecture</summary>
-        <div class="chapter-body">
-          <p>Unlike prior audio-visual self-supervised methods that use separate modality-specific encoders with complex loss combinations, MJEPA employs deliberate simplicity with three components:</p>
-          <h3>1. Unified Encoder</h3>
-          <p>A single Vision Transformer processes audio, video, or combined audio-video inputs through shared weights. Only the tokenization layers (patch embedding) and positional embeddings are modality-specific &mdash; everything else is shared.</p>
-          <h3>2. Intra-Modal Prediction</h3>
-          <p>Standard JEPA masking applied independently within each modality: predict masked token representations from visible context using L1 distance loss. Multi-level features from several encoder layers are fused for richer hierarchical representations.</p>
-          <h3>3. Cross-Modal Prediction</h3>
-          <p>Lightweight MLPs predict pooled last-layer features across modalities (audio&rarr;video, video&rarr;audio, audio&harr;audio-video). Global pooling is used because there is no natural token-level correspondence between audio and video. This alignment objective is what transforms the shared encoder from harmful to beneficial &mdash; the paper's central contribution.</p>
-        </div>
-      </details>
+      <div class="chapter" id="ch-architecture">
+        <h2>Core Architecture</h2>
+        <p>Unlike prior audio-visual self-supervised methods that use separate modality-specific encoders with complex loss combinations, MJEPA employs deliberate simplicity with three components:</p>
+        <h3>1. Unified Encoder</h3>
+        <p>A single Vision Transformer processes audio, video, or combined audio-video inputs through shared weights. Only the tokenization layers (patch embedding) and positional embeddings are modality-specific &mdash; everything else is shared.</p>
+        <h3>2. Intra-Modal Prediction</h3>
+        <p>Standard JEPA masking applied independently within each modality: predict masked token representations from visible context using L1 distance loss. Multi-level features from several encoder layers are fused for richer hierarchical representations.</p>
+        <h3>3. Cross-Modal Prediction</h3>
+        <p>Lightweight MLPs predict pooled last-layer features across modalities (audio&rarr;video, video&rarr;audio, audio&harr;audio-video). Global pooling is used because there is no natural token-level correspondence between audio and video. This alignment objective is what transforms the shared encoder from harmful to beneficial &mdash; the paper's central contribution.</p>
+      </div>
 
-      <details class="chapter" id="ch-ablation">
-        <summary>Progressive Ablation</summary>
-        <div class="chapter-body">
-          <p>The paper builds the final architecture incrementally, revealing that each component is essential. All numbers are audio / video mAP on AudioSet-20K with frozen evaluation:</p>
-          <ul>
-            <li><strong>Unimodal baselines</strong> (separate models): 30.87 / 19.84</li>
-            <li><strong>Naive shared encoder</strong> (no alignment): 28.70 / 17.90 &mdash; <em>both modalities degraded</em></li>
-            <li><strong>+ Cross-modal alignment</strong>: 33.52 / &mdash; &mdash; audio recovers and exceeds baseline</li>
-            <li><strong>+ Joint audio-video encoding</strong>: 38.89 / 25.38</li>
-            <li><strong>+ Data &amp; model scaling</strong> (ViT-g, 1B params): 40.97 / 29.82</li>
-            <li><strong>Audio-video combined</strong>: 45.44 mAP</li>
-          </ul>
-          <p>The naive-to-aligned jump is the paper's most striking result: simply sharing parameters <em>hurts</em>, but adding cross-modal prediction makes both modalities stronger than they were alone.</p>
-        </div>
-      </details>
+      <div class="chapter" id="ch-ablation">
+        <h2>Progressive Ablation</h2>
+        <p>The paper builds the final architecture incrementally, revealing that each component is essential. All numbers are audio / video mAP on AudioSet-20K with frozen evaluation:</p>
+        <ul>
+          <li><strong>Unimodal baselines</strong> (separate models): 30.87 / 19.84</li>
+          <li><strong>Naive shared encoder</strong> (no alignment): 28.70 / 17.90 &mdash; <em>both modalities degraded</em></li>
+          <li><strong>+ Cross-modal alignment</strong>: 33.52 / &mdash; &mdash; audio recovers and exceeds baseline</li>
+          <li><strong>+ Joint audio-video encoding</strong>: 38.89 / 25.38</li>
+          <li><strong>+ Data &amp; model scaling</strong> (ViT-g, 1B params): 40.97 / 29.82</li>
+          <li><strong>Audio-video combined</strong>: 45.44 mAP</li>
+        </ul>
+        <p>The naive-to-aligned jump is the paper's most striking result: simply sharing parameters <em>hurts</em>, but adding cross-modal prediction makes both modalities stronger than they were alone.</p>
+      </div>
 
-      <details class="chapter" id="ch-results">
-        <summary>Main Results</summary>
-        <div class="chapter-body">
-          <h3>Audio-Visual (AudioSet-20K)</h3>
-          <p>Frozen evaluation SOTA at 45.44 mAP (audio-video combined), outperforming previous best (EquiAV) by 4.3&ndash;6.8 mAP across modalities. Notably, the frozen video-only result (29.63) surpasses all reported <em>finetuned</em> baselines.</p>
-          <h3>Audio-Only Tasks</h3>
-          <p>Sets frozen representation SOTA across ESC-50 (96.9% accuracy) and FSD50K (65.8 mAP). Both numbers exceed finetuned EquiAV results, demonstrating strong positive transfer from video data improving audio representations.</p>
-          <h3>Video-Only Tasks</h3>
-          <p>Competitive with VJEPA2 despite using 10&times; less video data: Kinetics-400 at 85.0% (vs 86.6%) and Something-Something-v2 at 73.9% (vs 75.3%). Audio-video training provides a complementary learning signal that benefits video representations.</p>
-        </div>
-      </details>
+      <div class="chapter" id="ch-results">
+        <h2>Main Results</h2>
+        <h3>Audio-Visual (AudioSet-20K)</h3>
+        <p>Frozen evaluation SOTA at 45.44 mAP (audio-video combined), outperforming previous best (EquiAV) by 4.3&ndash;6.8 mAP across modalities. Notably, the frozen video-only result (29.63) surpasses all reported <em>finetuned</em> baselines.</p>
+        <h3>Audio-Only Tasks</h3>
+        <p>Sets frozen representation SOTA across ESC-50 (96.9% accuracy) and FSD50K (65.8 mAP). Both numbers exceed finetuned EquiAV results, demonstrating strong positive transfer from video data improving audio representations.</p>
+        <h3>Video-Only Tasks</h3>
+        <p>Competitive with VJEPA2 despite using 10&times; less video data: Kinetics-400 at 85.0% (vs 86.6%) and Something-Something-v2 at 73.9% (vs 75.3%). Audio-video training provides a complementary learning signal that benefits video representations.</p>
+      </div>
 
-      <details class="chapter" id="ch-comparison">
-        <summary>What Makes This Different</summary>
-        <div class="chapter-body">
-          <p>Previous audio-visual self-supervised methods relied on:</p>
-          <ul>
-            <li>Separate modality-specific encoders</li>
-            <li>Combinations of contrastive losses and reconstruction objectives</li>
-            <li>Heavy augmentation pipelines</li>
-            <li>ImageNet pretraining as initialization</li>
-          </ul>
-          <p>MJEPA uses <strong>none of these</strong> &mdash; a single shared encoder, one prediction-based objective, minimal augmentation, and trains from scratch. The elimination of these complexities, combined with explicit cross-modal alignment, achieves superior results across the board.</p>
-        </div>
-      </details>
+      <div class="chapter" id="ch-comparison">
+        <h2>What Makes This Different</h2>
+        <p>Previous audio-visual self-supervised methods relied on:</p>
+        <ul>
+          <li>Separate modality-specific encoders</li>
+          <li>Combinations of contrastive losses and reconstruction objectives</li>
+          <li>Heavy augmentation pipelines</li>
+          <li>ImageNet pretraining as initialization</li>
+        </ul>
+        <p>MJEPA uses <strong>none of these</strong> &mdash; a single shared encoder, one prediction-based objective, minimal augmentation, and trains from scratch. The elimination of these complexities, combined with explicit cross-modal alignment, achieves superior results across the board.</p>
+      </div>
 
       <div class="conclusion" id="conclusion">
         <h2>Conclusion</h2>
