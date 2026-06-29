@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Tokens to States — Paper Summary</title>
+  <style>
+    :root {
+      --bg: #FFF1E5;
+      --border: #E6D9CE;
+      --text: #33302E;
+      --text-muted: #807973;
+      --heading: #0D7680;
+      --accent: #990F3D;
+      --link: #0D7680;
+      --link-hover: #065459;
+      --tag-bg: #EBF1F1;
+      --tag-text: #0D7680;
+      --highlight-bg: #FCF0E8;
+      --sidebar-bg: #F6E9DD;
+      --sidebar-active: #FFFFFF;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* layout: sidebar + content */
+    .page {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 800px) {
+      .page { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem !important;
+      }
+    }
+
+    /* sidebar */
+    .sidebar {
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.25rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .sidebar h1 {
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+    .sidebar h1 a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .sidebar h1 a:hover { color: var(--heading); }
+    .sidebar .subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .sidebar h3 {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+    .sidebar h3:first-of-type { margin-top: 0; }
+    .sidebar ul { list-style: none; padding: 0; }
+    .sidebar li { margin-bottom: 0.15rem; }
+    .sidebar .nav-link {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 5px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sidebar .nav-link:hover {
+      background: var(--sidebar-active);
+      color: var(--heading);
+    }
+    .sidebar .nav-link.active {
+      background: var(--sidebar-active);
+      color: var(--heading);
+      font-weight: 600;
+    }
+    .sidebar .toc-section { margin-top: 1.5rem; }
+    .sidebar .toc-link {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.25rem 0.65rem;
+      border-radius: 5px;
+      transition: color 0.15s;
+    }
+    .sidebar .toc-link:hover,
+    .sidebar .toc-link.active {
+      color: var(--heading);
+      font-weight: 600;
+    }
+    .sidebar-footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .sidebar-footer a { color: var(--link); text-decoration: none; }
+
+    /* content */
+    .content {
+      padding: 2.5rem 2.5rem;
+      max-width: 800px;
+    }
+
+    /* header */
+    .paper-header {
+      border-bottom: 4px solid var(--text);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .paper-header h1 {
+      font-family: 'Georgia', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+    .paper-header .authors {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    .paper-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .paper-meta .tag {
+      display: inline-block;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 3px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+    }
+    .paper-meta .tag.difficulty {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* source box */
+    .source-box {
+      border-left: 4px solid var(--heading);
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.85rem;
+    }
+    .source-box .source-label {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .source-box a {
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px solid var(--link);
+    }
+    .source-box a:hover { color: var(--link-hover); border-color: var(--link-hover); }
+
+    /* tl;dr */
+    .tldr {
+      background: var(--highlight-bg);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .tldr strong { color: var(--accent); }
+    .tldr-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* sections */
+    h2 {
+      font-family: 'Georgia', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 2.5rem 0 0.75rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 1.5rem 0 0.5rem;
+    }
+    p { margin-bottom: 0.75rem; }
+    a { color: var(--link); }
+    a:hover { color: var(--link-hover); }
+
+    /* key takeaways */
+    .takeaways {
+      padding: 0;
+      margin: 1rem 0 2rem;
+      counter-reset: takeaway;
+    }
+    .takeaways h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+    .takeaway {
+      display: flex;
+      gap: 0.85rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+    .takeaway:last-child { border-bottom: none; }
+    .takeaway::before {
+      counter-increment: takeaway;
+      content: counter(takeaway);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--tag-bg);
+      color: var(--heading);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .takeaway a.ref {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--link);
+      margin-left: 0.25rem;
+      white-space: nowrap;
+    }
+    .takeaway a.ref:hover { border-bottom-style: solid; }
+
+    /* metrics grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0 2rem;
+    }
+    .metric-card {
+      border-bottom: 2px solid var(--heading);
+      padding: 1rem 0.5rem;
+    }
+    .metric-card .value {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--heading);
+    }
+    .metric-card .label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+    .metric-card .detail {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text);
+      margin-top: 0.5rem;
+    }
+
+    /* chapters */
+    .chapter { margin: 0.5rem 0 2rem; font-size: 0.92rem; }
+
+    /* so-what */
+    .so-what {
+      border-top: 3px solid var(--accent);
+      padding: 1.25rem 0;
+      margin: 2rem 0;
+    }
+    .so-what .so-what-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* conclusion */
+    .conclusion {
+      border-top: 2px solid var(--text);
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+    }
+
+    /* lists */
+    ul, ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+    li { margin-bottom: 0.35rem; font-size: 0.92rem; }
+
+    /* footer */
+    .paper-footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    @media print {
+      .sidebar { display: none; }
+      .page { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ====== persistent sidebar ====== -->
+    <aside class="sidebar">
+      <h1><a href="index.html">Papers</a></h1>
+      <p class="subtitle">Research paper summaries</p>
+
+      <h3>All Papers</h3>
+      <ul>
+        <li><a class="nav-link" href="mjepa-audio-visual-ssl.html">MJEPA: Audio-Visual JEPA</a></li>
+        <li><a class="nav-link active" href="tokens-to-states-llms-world-models.html">From Tokens to States: LLMs &amp; World Models</a></li>
+      </ul>
+
+      <div class="toc-section">
+        <h3>This Paper</h3>
+        <ul>
+          <li><a class="toc-link" href="#tldr">TL;DR</a></li>
+          <li><a class="toc-link" href="#takeaways">Key Takeaways</a></li>
+          <li><a class="toc-link" href="#ch-formalism">LLMs as World Models</a></li>
+          <li><a class="toc-link" href="#ch-constraints">LLM Constraints</a></li>
+          <li><a class="toc-link" href="#ch-empirical">Empirical Evidence</a></li>
+          <li><a class="toc-link" href="#ch-spectrum">The Continuous Spectrum</a></li>
+          <li><a class="toc-link" href="#ch-data-arch">Data &amp; Architecture Gaps</a></li>
+          <li><a class="toc-link" href="#conclusion">Conclusion</a></li>
+          <li><a class="toc-link" href="#so-what">So What?</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="https://github.com/ChristophePM/papers">GitHub</a>
+      </div>
+    </aside>
+
+    <!-- ====== content ====== -->
+    <div class="content">
+
+      <div class="paper-header">
+        <h1>From Tokens to States: LLMs as a Special Case of World Models and the Continuous Path Beyond</h1>
+        <p class="authors">Paul Dubois</p>
+        <div class="paper-meta">
+          <span class="tag">Computer Science</span>
+          <span class="tag">Large Language Models</span>
+          <span class="tag">World Models</span>
+          <span class="tag">AI Theory</span>
+          <span class="tag">2026</span>
+          <span class="tag difficulty">Technical</span>
+        </div>
+      </div>
+
+      <div class="source-box">
+        <div class="source-label">Source</div>
+        <a href="https://arxiv.org/abs/2606.28127v1">arXiv:2606.28127v1</a> &middot;
+        <a href="https://arxiv.org/html/2606.28127v1">HTML version</a>
+      </div>
+
+      <div class="tldr" id="tldr">
+        <div class="tldr-label">TL;DR</div>
+        <p>This paper argues that the LLM-vs-world-models debate is a false dichotomy. <strong>LLMs are mathematically a degenerate special case of world models</strong> &mdash; their state space is token sequences and their only action is appending the next token. A continuous spectrum of architectures connects next-token prediction (NTP) to JEPA, with each step relaxing one constraint while sacrificing a practical advantage. The real question isn't whether to replace LLMs, but how far along the spectrum a given task requires.</p>
+      </div>
+
+      <div class="takeaways" id="takeaways">
+        <h2 style="margin-top:0;border:none;padding:0;">Key Takeaways</h2>
+        <div class="takeaway">
+          <div><strong>LLMs are formally contained within the world-model class.</strong> By setting the state space to token sequences and the action space to the vocabulary, any LLM can be embedded in the standard world-model formalism (S, A, T, &rho;). The containment is strict &mdash; LLMs are a constrained subset, not a separate category. <a class="ref" href="#ch-formalism">&rarr; Formalism</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>LLMs already build internal world models.</strong> Mechanistic interpretability shows OthelloGPT encodes full board state at &gt;99% accuracy, chess models replicate this, and Llama-2 develops geographic and temporal representations &mdash; all from next-token prediction alone. <a class="ref" href="#ch-empirical">&rarr; Empirical Evidence</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Five distinct stations connect NTP to JEPA.</strong> Each step (NTP &rarr; MTP &rarr; Future Summary &rarr; Next-Latent &rarr; JEPA) relaxes exactly one constraint. The first three preserve internet-scale data and transformer fit; the last two sacrifice them. <a class="ref" href="#ch-spectrum">&rarr; Spectrum</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Two practical advantages explain LLM dominance.</strong> Internet-scale text data (~10<sup>13</sup> tokens) and transformer architecture co-design are the twin pillars. Both degrade as you move toward JEPA, explaining why the far end of the spectrum remains harder to scale. <a class="ref" href="#ch-constraints">&rarr; Constraints</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>A "data cliff" separates the spectrum's halves.</strong> The first three stations train on internet text; JEPA requires action-labeled environment data at orders of magnitude fewer samples (~10<sup>9</sup> vs ~10<sup>13</sup>). This is the fundamental bottleneck, not architecture. <a class="ref" href="#ch-data-arch">&rarr; Data &amp; Architecture</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Chain-of-thought extends planning without changing architecture.</strong> Extended thinking and CoT represent movement along the spectrum's planning-horizon axis, giving LLMs multi-step planning without requiring JEPA's architectural changes. <a class="ref" href="#ch-spectrum">&rarr; Spectrum</a></div>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch-formalism">
+        <h2>LLMs as a Special Case of World Models</h2>
+        <p>A world model consists of four components: a state space <em>S</em>, an action space <em>A</em>, a transition function <em>T</em>, and an initial distribution <em>&rho;</em>. Given a state and action, the transition function predicts the next state, enabling iterative trajectory simulation for planning.</p>
+        <p>The paper formally embeds LLMs within this framework by setting:</p>
+        <ul>
+          <li><strong>State space S = V*</strong> &mdash; all finite sequences over the vocabulary</li>
+          <li><strong>Action space A = V</strong> &mdash; the vocabulary itself</li>
+          <li><strong>Transition T</strong> &mdash; deterministic concatenation (appending the chosen token)</li>
+          <li><strong>Policy &pi;<sub>&theta;</sub></strong> &mdash; the LLM selects which token to append</li>
+        </ul>
+        <p>This establishes "LLMs &sub; World Models" as a strict mathematical containment. Every LLM is a world model; not every world model is an LLM.</p>
+      </div>
+
+      <div class="chapter" id="ch-constraints">
+        <h2>Five Constraints That Define LLMs</h2>
+        <p>Within the world-model class, LLMs are distinguished by five specific constraints &mdash; each a deliberate design choice that enables scaling but restricts generality:</p>
+        <ol>
+          <li><strong>Discrete token-sequence state representation</strong> &mdash; state is strings of tokens, not continuous vectors</li>
+          <li><strong>Single micro-token action granularity</strong> &mdash; one token per step, no macro-actions</li>
+          <li><strong>Re-derived rather than persistent state</strong> &mdash; hidden states are recomputed from the full sequence each pass (KV caching mitigates but doesn't eliminate this)</li>
+          <li><strong>Self-supervised next-token prediction training</strong> &mdash; the only objective is predicting the next token</li>
+          <li><strong>Transformer architecture</strong> &mdash; co-designed for discrete token sequences, with attention over positions</li>
+        </ol>
+        <p>The key insight: these constraints are what make LLMs <em>practical</em> at scale. Internet text provides effectively unlimited training data precisely because the state space is token sequences. The transformer architecture is optimized precisely for this discrete setting. Relaxing any constraint trades generality for one of these practical advantages.</p>
+      </div>
+
+      <div class="chapter" id="ch-empirical">
+        <h2>Empirical Evidence: World Models Inside LLMs</h2>
+        <p>Despite the discrete-token interface, mechanistic interpretability research demonstrates that LLMs develop rich internal world models in their hidden activations:</p>
+        <ul>
+          <li><strong>OthelloGPT</strong> &mdash; trained only on move sequences, yet encodes the full board state linearly in its activations at &gt;99% accuracy</li>
+          <li><strong>Chess models</strong> &mdash; replicate the same pattern, recovering piece positions from internal representations</li>
+          <li><strong>Llama-2</strong> &mdash; encodes geographic coordinates (spatial world model) and calendar-time representations from text alone</li>
+          <li><strong>Hidden-state attributes</strong> &mdash; internal states encode response-level properties (sentiment, topic, factuality) beyond what next-token prediction strictly requires</li>
+        </ul>
+        <p>This supports the paper's central reframing: <em>"the world model lives in the activations; tokens are the interface."</em> The discrete output doesn't mean the internal representation is discrete &mdash; it simply means the world model is projected through a token bottleneck.</p>
+      </div>
+
+      <div class="chapter" id="ch-spectrum">
+        <h2>The Continuous Spectrum: NTP to JEPA</h2>
+        <p>Rather than a binary choice between LLMs and JEPA, the paper identifies five stations along a continuous spectrum. Each step relaxes exactly one constraint:</p>
+
+        <h3>Station 1: NTP &rarr; Multi-Token Prediction (MTP)</h3>
+        <p>Predict <em>k</em> tokens simultaneously via independent heads. DeepSeek-V3 demonstrates +15% improvement on coding tasks. This step preserves both practical advantages: internet text data and transformer fit.</p>
+
+        <h3>Station 2: MTP &rarr; Future Summary</h3>
+        <p>An auxiliary head predicts a compressed future representation (bag-of-words or embedding) rather than exact tokens. Training data remains internet text; architecture remains transformer. The prediction target decouples from the token space.</p>
+
+        <h3>Station 3: Future Summary &rarr; Next-Latent</h3>
+        <p>The transformer predicts its own next latent state rather than future tokens. Training remains internet-scale (using hidden-state self-supervision), but continuous prediction begins to weaken transformer fit &mdash; the architecture was optimized for discrete outputs.</p>
+
+        <h3>Station 4: Next-Latent &rarr; JEPA</h3>
+        <p>Prediction becomes action-conditioned latent dynamics: given a state and an action, predict the next latent state. Training now requires paired (observation, action, next-observation) sequences from instrumented environments. This is where the data cliff hits &mdash; ~10<sup>9</sup> samples from environments vs ~10<sup>13</sup> tokens from text.</p>
+
+        <p>The paper also addresses LeCun's critique of LLMs through this lens. Chain-of-thought and extended thinking represent movement along the planning-horizon axis (from single-step to multi-step prediction) without requiring architectural change &mdash; suggesting JEPA is the far end of the spectrum, not a separate paradigm.</p>
+      </div>
+
+      <div class="chapter" id="ch-data-arch">
+        <h2>The Data and Architecture Questions</h2>
+
+        <h3>The Data Cliff</h3>
+        <p>The first three spectrum stations maintain internet-scale self-supervised training. The critical transition happens at JEPA: action-labeled environments provide orders of magnitude fewer samples than text. Current approaches like V-JEPA 2 approximate this gap by treating video-frame transitions as pseudo-actions, but the fundamental data asymmetry remains.</p>
+
+        <h3>The Architecture Gap</h3>
+        <p>The transformer was co-designed for discrete tokens. Extensions to continuous domains typically re-discretize inputs (image patches, video frames), which is effective but arguably misses the point. The paper argues a genuinely new architectural primitive may be needed for truly continuous-state prediction &mdash; analogous to how transformers themselves unified and replaced task-specific NLP architectures.</p>
+
+        <h3>Asymmetric Bottlenecks</h3>
+        <p>The LLM end of the spectrum is compute-bound (more GPUs, more tokens). The JEPA end is data-instrumentation-bound (building environments that produce rich action-labeled trajectories). These are fundamentally different scaling challenges, which is why the intermediate stations &mdash; improving world-model capacity while retaining internet data &mdash; may be the most productive near-term research direction.</p>
+      </div>
+
+      <div class="conclusion" id="conclusion">
+        <h2>Conclusion</h2>
+        <p>The LLM-versus-world-models debate rests on a false dichotomy. LLMs are not an alternative to world models &mdash; they are a constrained special case. The spectrum from NTP to JEPA reveals that "building better world models" doesn't require abandoning LLMs; it means progressively relaxing their constraints. The intermediate stations (MTP, Future Summary, Next-Latent) are particularly valuable because they improve world-model capacity while retaining the two practical advantages &mdash; internet text and transformer fit &mdash; that make LLMs scalable. The true open questions are not architectural but empirical: what training data enables action-conditioned models, and what architectural primitive suits continuous-state prediction.</p>
+      </div>
+
+      <div class="so-what" id="so-what">
+        <div class="so-what-label">So What?</div>
+        <p>This reframing matters because it redirects research effort. Instead of betting on either "scale up LLMs" or "build JEPA from scratch," teams can work on the <strong>intermediate stations</strong> &mdash; architectures that are strictly more capable than today's LLMs but don't require solving the data-instrumentation problem first. For practitioners, it means today's LLMs are already doing world modeling; the question is how to unlock the richer representations already forming in their hidden states.</p>
+      </div>
+
+      <div class="paper-footer">
+        Summary generated 2026-06-29 &middot; source: <a href="https://arxiv.org/abs/2606.28127v1">arXiv:2606.28127v1</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var links = document.querySelectorAll('.toc-link');
+      if (!links.length) return;
+      var sections = Array.from(links).map(function(a) {
+        var id = a.getAttribute('href');
+        return id ? document.querySelector(id) : null;
+      }).filter(Boolean);
+      function update() {
+        var current = sections[0];
+        for (var i = 0; i < sections.length; i++) {
+          if (sections[i].getBoundingClientRect().top <= 80) current = sections[i];
+        }
+        links.forEach(function(a) {
+          var id = a.getAttribute('href').replace('#', '');
+          a.classList.toggle('active', id === (current && current.id));
+        });
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+  </script>
+</body>
+</html>
