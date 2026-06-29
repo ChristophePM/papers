@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Abstractions: Yann LeCun — Paper Summary</title>
+  <style>
+    :root {
+      --bg: #FFF1E5;
+      --border: #E6D9CE;
+      --text: #33302E;
+      --text-muted: #807973;
+      --heading: #0D7680;
+      --accent: #990F3D;
+      --link: #0D7680;
+      --link-hover: #065459;
+      --tag-bg: #EBF1F1;
+      --tag-text: #0D7680;
+      --highlight-bg: #FCF0E8;
+      --sidebar-bg: #F6E9DD;
+      --sidebar-active: #FFFFFF;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 4rem; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* layout: sidebar + content */
+    .page {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 800px) {
+      .page { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem !important;
+      }
+    }
+
+    /* sidebar */
+    .sidebar {
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1.25rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .sidebar h1 {
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+    .sidebar h1 a {
+      color: var(--text);
+      text-decoration: none;
+    }
+    .sidebar h1 a:hover { color: var(--heading); }
+    .sidebar .subtitle {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .sidebar h3 {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+    .sidebar h3:first-of-type { margin-top: 0; }
+    .sidebar ul { list-style: none; padding: 0; }
+    .sidebar li { margin-bottom: 0.15rem; }
+    .sidebar .nav-link {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.35rem 0.65rem;
+      border-radius: 5px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sidebar .nav-link:hover {
+      background: var(--sidebar-active);
+      color: var(--heading);
+    }
+    .sidebar .nav-link.active {
+      background: var(--sidebar-active);
+      color: var(--heading);
+      font-weight: 600;
+    }
+    .sidebar .toc-section { margin-top: 1.5rem; }
+    .sidebar .toc-link {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.25rem 0.65rem;
+      border-radius: 5px;
+      transition: color 0.15s;
+    }
+    .sidebar .toc-link:hover,
+    .sidebar .toc-link.active {
+      color: var(--heading);
+      font-weight: 600;
+    }
+    .sidebar-footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .sidebar-footer a { color: var(--link); text-decoration: none; }
+
+    /* content */
+    .content {
+      padding: 2.5rem 2.5rem;
+      max-width: 800px;
+    }
+
+    /* header */
+    .paper-header {
+      border-bottom: 4px solid var(--text);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .paper-header h1 {
+      font-family: 'Georgia', serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+    .paper-header .authors {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    .paper-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .paper-meta .tag {
+      display: inline-block;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 3px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+    }
+    .paper-meta .tag.difficulty {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* source box */
+    .source-box {
+      border-left: 4px solid var(--heading);
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.85rem;
+    }
+    .source-box .source-label {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .source-box a {
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px solid var(--link);
+    }
+    .source-box a:hover { color: var(--link-hover); border-color: var(--link-hover); }
+
+    /* tl;dr */
+    .tldr {
+      background: var(--highlight-bg);
+      border-left: 4px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+    .tldr strong { color: var(--accent); }
+    .tldr-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* sections */
+    h2 {
+      font-family: 'Georgia', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--heading);
+      margin: 2.5rem 0 0.75rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 1.5rem 0 0.5rem;
+    }
+    p { margin-bottom: 0.75rem; }
+    a { color: var(--link); }
+    a:hover { color: var(--link-hover); }
+
+    /* key takeaways */
+    .takeaways {
+      padding: 0;
+      margin: 1rem 0 2rem;
+      counter-reset: takeaway;
+    }
+    .takeaways h2 { margin-top: 0; border-bottom: none; padding-bottom: 0; }
+    .takeaway {
+      display: flex;
+      gap: 0.85rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+    .takeaway:last-child { border-bottom: none; }
+    .takeaway::before {
+      counter-increment: takeaway;
+      content: counter(takeaway);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--tag-bg);
+      color: var(--heading);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .takeaway a.ref {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--link);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--link);
+      margin-left: 0.25rem;
+      white-space: nowrap;
+    }
+    .takeaway a.ref:hover { border-bottom-style: solid; }
+
+    /* chapters */
+    .chapter { margin: 0.5rem 0 2rem; font-size: 0.92rem; }
+
+    /* so-what */
+    .so-what {
+      border-top: 3px solid var(--accent);
+      padding: 1.25rem 0;
+      margin: 2rem 0;
+    }
+    .so-what .so-what-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    /* conclusion */
+    .conclusion {
+      border-top: 2px solid var(--text);
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+    }
+
+    /* lists */
+    ul, ol { padding-left: 1.25rem; margin: 0.5rem 0; }
+    li { margin-bottom: 0.35rem; font-size: 0.92rem; }
+
+    /* footer */
+    .paper-footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    @media print {
+      .sidebar { display: none; }
+      .page { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ====== persistent sidebar ====== -->
+    <aside class="sidebar">
+      <h1><a href="index.html">Papers</a></h1>
+      <p class="subtitle">Research paper summaries</p>
+
+      <h3>All Papers</h3>
+      <ul>
+        <li><a class="nav-link" href="mjepa-audio-visual-ssl.html">MJEPA: Audio-Visual JEPA</a></li>
+        <li><a class="nav-link" href="tokens-to-states-llms-world-models.html">From Tokens to States: LLMs &amp; World Models</a></li>
+        <li><a class="nav-link active" href="learning-abstractions-conversation-yann-lecun.html">Learning Abstractions: Yann LeCun</a></li>
+      </ul>
+
+      <div class="toc-section">
+        <h3>This Paper</h3>
+        <ul>
+          <li><a class="toc-link" href="#tldr">TL;DR</a></li>
+          <li><a class="toc-link" href="#takeaways">Key Takeaways</a></li>
+          <li><a class="toc-link" href="#ch-limitations">Limitations of Current AI</a></li>
+          <li><a class="toc-link" href="#ch-jepa">JEPA &amp; Learning Abstractions</a></li>
+          <li><a class="toc-link" href="#ch-terminology">AMI vs. AGI</a></li>
+          <li><a class="toc-link" href="#ch-search">Search-Based Reasoning</a></li>
+          <li><a class="toc-link" href="#ch-science">AI for Scientific Discovery</a></li>
+          <li><a class="toc-link" href="#ch-open">Open Science</a></li>
+          <li><a class="toc-link" href="#conclusion">Conclusion</a></li>
+          <li><a class="toc-link" href="#so-what">So What?</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="https://github.com/ChristophePM/papers">GitHub</a>
+      </div>
+    </aside>
+
+    <!-- ====== content ====== -->
+    <div class="content">
+
+      <div class="paper-header">
+        <h1>Learning Abstractions: A Conversation with Yann LeCun</h1>
+        <p class="authors">Yann LeCun (NYU &amp; Meta FAIR) &amp; James M. Manyika (Google Alphabet) &mdash; D&aelig;dalus, American Academy of Arts &amp; Sciences</p>
+        <div class="paper-meta">
+          <span class="tag">Computer Science</span>
+          <span class="tag">Artificial Intelligence</span>
+          <span class="tag">World Models</span>
+          <span class="tag">Open Science</span>
+          <span class="tag">2026</span>
+          <span class="tag difficulty">Accessible</span>
+        </div>
+      </div>
+
+      <div class="source-box">
+        <div class="source-label">Source</div>
+        <a href="https://www.amacad.org/publication/daedalus/learning-abstractions-conversation-yann-lecun">D&aelig;dalus, Winter/Spring 2026</a>
+      </div>
+
+      <div class="tldr" id="tldr">
+        <div class="tldr-label">TL;DR</div>
+        <p>In a wide-ranging conversation for D&aelig;dalus, Yann LeCun argues that <strong>current LLMs cannot reach human-level intelligence</strong> because they lack world models, cannot plan, and predict tokens instead of learning abstractions. He proposes Joint-Embedding Predictive Architectures (JEPA) as the path forward &mdash; systems that learn to predict at the right level of abstraction, the way scientists do, rather than reconstructing every pixel or token. He also makes a forceful case that <strong>open science is not optional</strong> for AI progress &mdash; secretive labs cannot solve problems that require entire research communities.</p>
+      </div>
+
+      <div class="takeaways" id="takeaways">
+        <h2 style="margin-top:0;border:none;padding:0;">Key Takeaways</h2>
+        <div class="takeaway">
+          <div><strong>LLMs are fundamentally limited by token-level prediction.</strong> They cannot model physical systems with noise and stochasticity because they try to predict every detail instead of learning useful abstractions. <a class="ref" href="#ch-limitations">&rarr; Limitations</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Abstraction level determines the discipline.</strong> JEPA learns representations that discard unpredictable information while retaining what&rsquo;s useful &mdash; choosing the right abstraction level is what separates physics from chemistry from biology. <a class="ref" href="#ch-jepa">&rarr; JEPA</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>&ldquo;AGI&rdquo; is a misleading term.</strong> Human intelligence isn&rsquo;t general &mdash; we excel narrowly. LeCun prefers &ldquo;Advanced Machine Intelligence&rdquo; (AMI), emphasizing that complete generality is theoretically impossible. <a class="ref" href="#ch-terminology">&rarr; AMI vs. AGI</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Reasoning requires search, not just generation.</strong> Current LLMs produce output autoregressively with no optimization loop. Real reasoning needs a generator <em>plus</em> an evaluator performing search in continuous representation spaces. <a class="ref" href="#ch-search">&rarr; Search</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>AI will be a research assistant, not an autonomous scientist.</strong> Scientists set objectives; AI explores and reports &mdash; like a PhD advisor guiding without micromanaging. <a class="ref" href="#ch-science">&rarr; Scientific Discovery</a></div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Open-source AI is a strategic necessity.</strong> Difficult scientific problems require entire communities. Secretive labs can&rsquo;t recruit top scientists and can&rsquo;t prevent self-deception without peer scrutiny. <a class="ref" href="#ch-open">&rarr; Open Science</a></div>
+        </div>
+      </div>
+
+      <div class="chapter" id="ch-limitations">
+        <h2>Limitations of Current AI Systems</h2>
+        <p>LeCun identifies three fundamental constraints that prevent LLMs from achieving human-level intelligence:</p>
+        <h3>1. The Prediction Problem</h3>
+        <p>Physical systems contain noise and stochastic elements that make pixel- or token-level prediction impossible. Scientists have always addressed this through abstraction &mdash; eliminating unpredictable details and making predictions in simplified representation spaces. LLMs, by contrast, are forced to predict every next token, which is fundamentally at odds with how understanding works.</p>
+        <h3>2. No World Models</h3>
+        <p>LLMs lack causal models that integrate state-action-next state sequences. Without these, they cannot run virtual experiments, optimize plans, or reason about the consequences of actions. This is the gap between pattern matching and genuine understanding.</p>
+        <h3>3. Training Inefficiency</h3>
+        <p>Post-training through supervised learning (RLHF, expert annotation) becomes prohibitively expensive at scale. You cannot annotate examples for every possible scenario a system might encounter. A human child learns to navigate the physical world from a few years of experience; LLMs require orders of magnitude more data and still fail at basic physical reasoning.</p>
+      </div>
+
+      <div class="chapter" id="ch-jepa">
+        <h2>JEPA &amp; Learning Abstractions</h2>
+        <p>Joint-Embedding Predictive Architectures offer LeCun&rsquo;s proposed alternative to generative models. Rather than reconstructing pixel-level details (as diffusion models or autoregressive models do), JEPA learns representations that eliminate unpredictable information while retaining what is predictively useful.</p>
+        <p>The core insight mirrors scientific methodology: <strong>the choice of abstraction level determines the discipline</strong>. Predicting atomic interactions gives you quantum chemistry; predicting molecular behavior gives you biochemistry; predicting cellular behavior gives you biology. Each level deliberately discards detail that is irrelevant at that scale.</p>
+        <p>JEPA applies this principle to machine learning: instead of predicting in pixel space (where much is unpredictable), predict in a learned embedding space where the unpredictable parts have been factored out. Longer-horizon predictions naturally require progressively higher abstraction levels, accepting information loss for tractability.</p>
+      </div>
+
+      <div class="chapter" id="ch-terminology">
+        <h2>AMI vs. AGI: Why Terminology Matters</h2>
+        <p>LeCun rejects the term &ldquo;artificial general intelligence&rdquo; on both practical and theoretical grounds. Human intelligence itself is not general &mdash; we are spectacularly narrow in most domains and only excel at a few. The term &ldquo;AGI&rdquo; implies a threshold that doesn&rsquo;t exist and feeds narratives about superintelligent machines that &ldquo;only happens in bad sci-fi movies.&rdquo;</p>
+        <p>He advocates instead for <strong>Advanced Machine Intelligence (AMI)</strong> &mdash; systems that exceed human capability in specific domains while remaining tools under human direction. The rebranding is not cosmetic: it shifts the conversation from existential risk fantasies to engineering roadmaps about what capabilities we can actually build and how to deploy them responsibly.</p>
+      </div>
+
+      <div class="chapter" id="ch-search">
+        <h2>Search-Based Reasoning</h2>
+        <p>Current LLMs generate outputs autoregressively &mdash; each token is produced in a single forward pass with no opportunity for optimization or backtracking. LeCun argues this is fundamentally insufficient for reasoning.</p>
+        <p>Effective AI requires two components working together: a <strong>generator</strong> that produces candidate solutions and an <strong>evaluator</strong> that scores them. Chess demonstrated this decades ago through tree search &mdash; the engine doesn&rsquo;t just produce one move, it explores and evaluates thousands of possibilities.</p>
+        <p>The challenge for AI is performing this search in <em>continuous representation spaces</em> rather than discrete token sequences. This is where world models become essential: they provide the simulator in which candidate action sequences can be evaluated before being executed in the real world.</p>
+      </div>
+
+      <div class="chapter" id="ch-science">
+        <h2>AI for Scientific Discovery</h2>
+        <p>LeCun envisions AI as research assistants working under scientist direction rather than autonomous investigators. The relationship mirrors a PhD advisor: scientists provide objectives and constraints; AI systems explore the space and report findings.</p>
+        <h3>Promising Domains</h3>
+        <ul>
+          <li><strong>Materials science &amp; protein design</strong> &mdash; exploring vast combinatorial spaces that humans cannot search manually</li>
+          <li><strong>Chronic disease &amp; cancer treatment</strong> &mdash; modeling complex biological pathways from organelles to organ systems</li>
+          <li><strong>Energy storage &amp; catalysis</strong> &mdash; optimizing chemical processes through simulation</li>
+          <li><strong>Cosmological simulations</strong> &mdash; validating theories about dark matter through phenomenological modeling</li>
+        </ul>
+        <h3>Curiosity as a Learning Mechanism</h3>
+        <p>LeCun frames curiosity as uncertainty-driven learning. When a model&rsquo;s predictions fail, it adjusts its parameters. When predictions feel uncertain, the agent experiments &mdash; like infants systematically dropping objects to test gravity. This mirrors the scientific method: hypothesis, intervention, observation, model correction.</p>
+        <h3>Reductionism vs. Phenomenology</h3>
+        <p>Complex emergent properties &mdash; superconductivity at magic angles, intelligence emerging from neurons &mdash; resist reduction to fundamental equations. Data-driven phenomenological approaches, bridging microscopic and macroscopic scales, offer practical alternatives where pure theory cannot reach. Three fundamental questions remain: what comprises the universe, what is life, and how does the brain function.</p>
+      </div>
+
+      <div class="chapter" id="ch-open">
+        <h2>The Case for Open Science</h2>
+        <p>LeCun makes one of the conversation&rsquo;s strongest arguments on open-source AI, going beyond ideology to strategic necessity:</p>
+        <ul>
+          <li><strong>Peer scrutiny prevents self-deception.</strong> Without publication and community review, researchers cannot distinguish genuine progress from artifacts. Science requires adversarial verification.</li>
+          <li><strong>Talent follows openness.</strong> Scientists want to publish. Secretive companies struggle to recruit and retain top researchers because the work cannot be shared.</li>
+          <li><strong>Open tools accelerate everyone.</strong> TensorFlow, PyTorch, and JAX transformed AI research by democratizing access to infrastructure. The competitive advantage comes from engineering specifics, not theoretical breakthroughs.</li>
+          <li><strong>Hard problems require communities.</strong> No small team &mdash; however talented &mdash; can solve problems at the frontier of AI alone. The claim that a secretive group will develop transformative AI &ldquo;only happens in bad sci-fi movies.&rdquo;</li>
+        </ul>
+        <p>On geopolitical concerns about sharing AI research: LeCun contends that the benefits of open collaboration far outweigh the risks. Restricting research doesn&rsquo;t prevent adversaries from developing capability &mdash; it only ensures your own community falls behind.</p>
+      </div>
+
+      <div class="conclusion" id="conclusion">
+        <h2>Conclusion</h2>
+        <p>LeCun&rsquo;s vision is coherent and contrarian: the current LLM paradigm is a dead end for achieving human-level intelligence, not because of scale limitations but because of <em>architectural</em> ones. Token prediction cannot learn world models; without world models there is no planning or reasoning; without planning or reasoning there is no intelligence. The path forward runs through JEPA, learned abstractions, search-based reasoning, and open scientific collaboration &mdash; not through bigger language models.</p>
+      </div>
+
+      <div class="so-what" id="so-what">
+        <div class="so-what-label">So What?</div>
+        <p>Whether or not you agree with LeCun&rsquo;s specific prescriptions, his diagnosis points to a real tension in AI: the industry is scaling a paradigm (next-token prediction) that even its most prominent practitioners acknowledge cannot reach its stated goals. For anyone building on LLMs today, the practical implication is clear &mdash; <strong>treat them as powerful pattern matchers, not reasoning engines</strong>, and watch the JEPA/world-model research line for the next architectural shift.</p>
+      </div>
+
+      <div class="paper-footer">
+        Summary generated 2026-06-29 &middot; source: <a href="https://www.amacad.org/publication/daedalus/learning-abstractions-conversation-yann-lecun">D&aelig;dalus, Winter/Spring 2026</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var links = document.querySelectorAll('.toc-link');
+      if (!links.length) return;
+      var sections = Array.from(links).map(function(a) {
+        var id = a.getAttribute('href');
+        return id ? document.querySelector(id) : null;
+      }).filter(Boolean);
+      function update() {
+        var current = sections[0];
+        for (var i = 0; i < sections.length; i++) {
+          if (sections[i].getBoundingClientRect().top <= 80) current = sections[i];
+        }
+        links.forEach(function(a) {
+          var id = a.getAttribute('href').replace('#', '');
+          a.classList.toggle('active', id === (current && current.id));
+        });
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+  </script>
+</body>
+</html>
